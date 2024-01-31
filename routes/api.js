@@ -1,3 +1,4 @@
+// api.js
 "use strict";
 
 const mongoose = require("mongoose");
@@ -35,9 +36,15 @@ module.exports = function (app) {
 
         // Extract relevant stock data
         const price = response.data.latestPrice;
-        const likes = hasLiked ? 0 : 1; // Increment likes if not already liked
+        let likes = hasLiked ? 0 : 1; // Increment likes if not already liked
 
-        return { price, likes };
+        // Adjust likes count if liking the same stock again
+        if (like && !hasLiked) {
+          likes += 1;
+          await Ip.create({ address: anonymizedIp });
+        }
+
+        return { price, stock: response.data.symbol, likes };
       } catch (error) {
         console.error("Error fetching stock data:", error.message);
         throw error;
@@ -89,11 +96,6 @@ module.exports = function (app) {
       res.json({
         stockData,
       });
-    }
-
-    // Save anonymized IP to the database if like is true and not already liked
-    if (like && !hasLiked) {
-      await Ip.create({ address: anonymizedIp });
     }
   });
 
