@@ -4,12 +4,28 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
+const mongoose = require("mongoose");
 
 const apiRoutes = require("./routes/api.js");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner.js");
 
 const app = express();
+// Mendapatkan URL koneksi dari file .env
+const mongoDBUrl = process.env.MONGODB_URI;
+
+mongoose.connect(mongoDBUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const db = mongoose.connection;
+
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
+db.once("open", function () {
+  console.log("Connected to MongoDB");
+});
+
 app.use(helmet());
 app.use("/public", express.static(__dirname + "/public"));
 
