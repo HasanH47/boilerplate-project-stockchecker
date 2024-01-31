@@ -26,7 +26,16 @@ db.once("open", function () {
   console.log("Connected to MongoDB");
 });
 
+const csp = {
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'"],
+  },
+};
+
 app.use(helmet());
+app.use(helmet.contentSecurityPolicy(csp));
 app.use("/public", express.static(__dirname + "/public"));
 
 app.use(cors({ origin: "*" })); //For FCC testing purposes only

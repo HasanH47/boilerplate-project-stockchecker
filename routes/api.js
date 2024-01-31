@@ -21,16 +21,42 @@ module.exports = function (app) {
     // Check if IP already liked the stock
     const hasLiked = await Ip.exists({ address: anonymizedIp });
 
-    // Implement logic to fetch stock prices and handle likes
+    // Process stockSymbol and like parameter as needed
+    // ...
 
-    // Example response
-    res.json({
-      stockData: {
+    // Example response structure
+    if (Array.isArray(stockSymbol)) {
+      // Case: Two stocks passed
+      const stockData1 = {
+        stock: stockSymbol[0],
+        price: 100.0, // Replace with actual stock price
+        likes: hasLiked ? 0 : 1, // Increment likes if not already liked
+      };
+
+      const stockData2 = {
+        stock: stockSymbol[1],
+        price: 150.0, // Replace with actual stock price
+        likes: hasLiked ? 0 : 1, // Increment likes if not already liked
+      };
+
+      const rel_likes = stockData1.likes - stockData2.likes;
+
+      res.json({
+        stockData: [stockData1, stockData2],
+        rel_likes: rel_likes,
+      });
+    } else {
+      // Case: One stock passed
+      const stockData = {
         stock: stockSymbol,
         price: 100.0, // Replace with actual stock price
         likes: hasLiked ? 0 : 1, // Increment likes if not already liked
-      },
-    });
+      };
+
+      res.json({
+        stockData: stockData,
+      });
+    }
 
     // Save anonymized IP to the database if like is true and not already liked
     if (like && !hasLiked) {
