@@ -12,7 +12,7 @@ const runner = require("./test-runner.js");
 
 const app = express();
 // Mendapatkan URL koneksi dari file .env
-const mongoDBUrl = process.env.MONGODB_URI;
+const mongoDBUrl = process.env.DB;
 
 mongoose.connect(mongoDBUrl, {
   useNewUrlParser: true,
