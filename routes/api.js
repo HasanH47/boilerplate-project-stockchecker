@@ -11,7 +11,7 @@ const Ip = mongoose.model("Ip", ipSchema);
 
 module.exports = function (app) {
   app.route("/api/stock-prices").get(async function (req, res) {
-    const stockSymbol = req.query.stock;
+    const stockSymbols = req.query.stock;
     const like = req.query.like || false;
     const ip = req.ip; // Express automatically retrieves the IP address
 
@@ -21,20 +21,19 @@ module.exports = function (app) {
     // Check if IP already liked the stock
     const hasLiked = await Ip.exists({ address: anonymizedIp });
 
-    // Process stockSymbol and like parameter as needed
-    // ...
-
     // Example response structure
-    if (Array.isArray(stockSymbol)) {
+    if (Array.isArray(stockSymbols) && stockSymbols.length === 2) {
       // Case: Two stocks passed
+      const [stockSymbol1, stockSymbol2] = stockSymbols;
+
       const stockData1 = {
-        stock: stockSymbol[0],
+        stock: stockSymbol1,
         price: 100.0, // Replace with actual stock price
         likes: hasLiked ? 0 : 1, // Increment likes if not already liked
       };
 
       const stockData2 = {
-        stock: stockSymbol[1],
+        stock: stockSymbol2,
         price: 150.0, // Replace with actual stock price
         likes: hasLiked ? 0 : 1, // Increment likes if not already liked
       };
@@ -42,19 +41,21 @@ module.exports = function (app) {
       const rel_likes = stockData1.likes - stockData2.likes;
 
       res.json({
-        stockData: [stockData1, stockData2],
-        rel_likes: rel_likes,
+        stockData: [
+          { ...stockData1, rel_likes },
+          { ...stockData2, rel_likes: -rel_likes }, // Negative for the second stock
+        ],
       });
     } else {
       // Case: One stock passed
       const stockData = {
-        stock: stockSymbol,
+        stock: stockSymbols,
         price: 100.0, // Replace with actual stock price
         likes: hasLiked ? 0 : 1, // Increment likes if not already liked
       };
 
       res.json({
-        stockData: stockData,
+        stockData,
       });
     }
 
